@@ -4,8 +4,14 @@
 // Données : FT « MAJ 2025/2026 » + corrections validées K. Ranson (23, 24 et 25/07/2026).
 //
 // Catégories disponibles : '1' · '3' · '4' · '5' · '6' · '7plus'
-// Usage page collection : renderGlobalComparator('5', 'spa-page-comparator');
-// Usage page produit    : initProductComparator('adagio', '5', 'spa-page-comparator');
+// Usage page produit    : initSpaComparator('adagio', 'spa-page-comparator');
+// Usage page collection : renderSpaComparator('5', 'spa-page-comparator');
+//
+// Tout est encapsulé dans une IIFE et les fonctions sont préfixées "Spa" :
+// aucun conflit possible avec comparateur-final-sync-vX.js (spas de nage).
+
+(function () {
+'use strict';
 
 const allSpasData = {
   "1": [
@@ -54,7 +60,8 @@ const allSpasData = {
 
 function blsBuildComparator(data, containerId) {
     const container = document.getElementById(containerId);
-    if (!data || !data.length || !container) return;
+    if (!container) { console.warn('[comparateur-spas] conteneur introuvable : #' + containerId); return; }
+    if (!data || !data.length) { console.warn('[comparateur-spas] aucune donnée pour ce groupe'); return; }
 
     container.innerHTML = `
     <div class="comparator-wrapper"><div class="comparator-section">
@@ -121,14 +128,16 @@ function blsBuildComparator(data, containerId) {
 }
 
 // Comparateur global d'un groupe de places
-window.renderGlobalComparator = function(category, containerId) {
+window.renderSpaComparator = function(category, containerId) {
     blsBuildComparator(allSpasData[category], containerId);
 };
 
-// Comparateur de page produit : met le spa courant en premier
-window.initProductComparator = function(spaId, category, containerId) {
-    let data = [...(allSpasData[category] || [])];
-    if (!data.length) return;
+// Comparateur de page produit : le groupe de places est retrouvé automatiquement.
+// 3e argument facultatif pour forcer la catégorie.
+window.initSpaComparator = function(spaId, containerId, category) {
+    const cat = category || Object.keys(allSpasData).find(k => allSpasData[k].some(s => s.id === spaId));
+    let data = [...((cat && allSpasData[cat]) || [])];
+    if (!data.length) { console.warn('[comparateur-spas] modèle introuvable :', spaId); return; }
     const currentIndex = data.findIndex(s => s.id === spaId);
     if (currentIndex > 0) {
         const current = data[currentIndex];
@@ -137,8 +146,6 @@ window.initProductComparator = function(spaId, category, containerId) {
     blsBuildComparator(data, containerId);
 };
 
-// Retrouve automatiquement le groupe de places d'un modèle (évite de coder la catégorie en dur)
-window.initProductComparatorAuto = function(spaId, containerId) {
-    const cat = Object.keys(allSpasData).find(k => allSpasData[k].some(s => s.id === spaId));
-    if (cat) window.initProductComparator(spaId, cat, containerId);
-};
+window.BLS_SPAS_READY = true;
+
+})();
