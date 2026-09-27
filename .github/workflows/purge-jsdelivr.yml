@@ -16,11 +16,12 @@ jobs:
           FILES=(
             "simulateur-financement.js"
             "comparateur-final-sync-v5.js"
+            "comparateur-spas-v1.js"
           )
 
           for FILE in "${FILES[@]}"; do
             echo "Purge de $FILE ..."
-            curl -s "https://purge.jsdelivr.net/gh/contact78/bluelagoon-comparateur@latest/$FILE"
+            curl -s "https://purge.jsdelivr.net/gh/Adriouss/bluelagoon-comparateur@main/$FILE"
             echo ""
           done
 
